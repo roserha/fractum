@@ -11,7 +11,7 @@ function testDiverge(real, imag, c_real, c_imag) {
     let newReal = real; let newImag = imag;
 
     for (let i = 0; i < threshold; i++) {
-        if (magnitude(oldImag, oldImag) > 250) {
+        if (magnitude(oldReal, oldImag) > 250) {
             return Color.hsl((180 + 180 * (i / 25)) % 360, 0.35, Math.min((i / 25), 0.75))
         } else {
             switch (fractType) {
