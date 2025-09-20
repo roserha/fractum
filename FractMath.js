@@ -391,4 +391,4 @@ const screamingSoul = gpu.createKernel(function (a1, b1, a2, b2, t) {
     if (!diverged) { this.color(1, 1, 1, 1); }
 })
 .setGraphical(true)
-.setOutput([512, 512]);
+.setOutput([512, 512])

@@ -109,7 +109,6 @@ onwheel = (event) => {
 
     drawCells();
 }
-
 function updateData() {
     $("#fromNum").text(`${(-200/scale+offsetX).toFixed(6)} + ${(-200/scale+offsetY).toFixed(6)} i`)
     $("#toNum").text(`${(200/scale+offsetX).toFixed(6)} + ${(200/scale+offsetY).toFixed(6)} i`)
