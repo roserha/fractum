@@ -26,6 +26,10 @@ function magnitude(real, imag) {
     return Math.sqrt(real * real + imag * imag);
 }
 
+function fakeMagnitude(real, imag) {
+    return (real * real + imag * imag);
+}
+
 function hueToRgb(p, q, t) {
   if (t < 0) t += 1;
   if (t > 1) t -= 1;
@@ -60,6 +64,7 @@ const gpu = new GPU.GPU();
 
 gpu
 .addFunction(magnitude)
+.addFunction(fakeMagnitude)
 .addFunction(hueToRgb)
 .addFunction(HSLtoRGB)
 .addFunction(arg)
@@ -68,8 +73,7 @@ gpu
 .addFunction(ab_cd_real)
 .addFunction(ab_cd_imag);
 
-// const testDiverge = gpu.createKernel(function (real, imag, c_real, c_imag, t, fractType) {
-const testDiverge = gpu.createKernel(function (a1, b1, a2, b2, t, fractType) {
+const mandelbrotSet = gpu.createKernel(function (a1, b1, a2, b2, t) {
     let y = this.thread.y; let x = this.thread.x;
 
     let dx = (a2 - a1) / 512;
@@ -77,67 +81,310 @@ const testDiverge = gpu.createKernel(function (a1, b1, a2, b2, t, fractType) {
     
     let real = 0; let imag = 0;
 
-    
     let c_real = a1 + dx*x;
     let c_imag = b1 + dy*y;
-    
     
     let oldReal = real; let oldImag = imag;
     let newReal = real; let newImag = imag;
     
-   
     let diverged = false;
 
-    let maxMagnitude = 4;
-
-    if (fractType > 2499) {
-        maxMagnitude = 250;
-    }
+    let maxMagnitude = 16;
 
     for (let i = 0; i < t; i++) {
-        if (magnitude(oldReal, oldImag) > maxMagnitude) {
+        if (fakeMagnitude(oldReal, oldImag) > maxMagnitude) {
             const colors = HSLtoRGB((180 + 180 * (i / 25)) % 360, 0.35, Math.min((i / 25), 0.75))
             this.color(colors[0], colors[1], colors[2], 1);
             diverged = true;
             break;
             // return [(180 + 180 * (i / 25)) % 360, 0.35, Math.min((i / 25), 0.75), 1];
-        } else {
-            if (fractType == 3) {
-                newReal = ((oldReal * oldReal * oldReal) - (3 * oldReal * oldImag * oldImag)) + c_real
-                newImag = ((3 * oldReal * oldReal * oldImag) - (oldImag * oldImag * oldImag)) + c_imag
-            }
+        } 
+        else {
+            newReal = ((oldReal * oldReal) - (oldImag * oldImag)) + c_real
+            newImag = (2 * oldReal * oldImag) + c_imag    
+            
+            oldReal = newReal; oldImag = newImag;
+        }
+    }
 
-            else if (fractType == 4) {
-                newReal = ((oldReal * oldReal * oldReal * oldReal) - (6 * oldReal * oldReal * oldImag * oldImag) + (oldImag * oldImag * oldImag * oldImag)) + c_real
-                newImag = ((4 * oldReal * oldReal * oldReal * oldImag) - (4 * oldReal * oldImag * oldImag * oldImag)) + c_imag
-            }
+    if (!diverged) { this.color(1, 1, 1, 1); }
+})
+.setGraphical(true)
+.setOutput([512, 512]);
 
-            else if (fractType == 2501) {
-                newReal = e_z_real(oldReal, oldImag) + c_real;
-                newImag = e_z_imag(oldReal, oldImag) + c_imag;
-            }
+const triplebrotSet = gpu.createKernel(function (a1, b1, a2, b2, t) {
+    let y = this.thread.y; let x = this.thread.x;
 
-            else if (fractType == 2502) {
-                newReal = ab_cd_real(oldReal, oldImag, magnitude(oldReal, oldImag), 0) + c_real;
-                newImag = ab_cd_imag(oldReal, oldImag, magnitude(oldReal, oldImag), 0) + c_imag;
-            }
-                
-            else {
-                    if (fractType == -1) {
-                        newReal = Math.abs(oldReal); newImag = Math.abs(oldImag);
-                        oldReal = newReal
-                        oldImag = newImag
-                    } else if (fractType == -3) {
-                        newImag = -oldImag;
-                        oldImag = newImag
-                    }
-        
-                    newReal = ((oldReal * oldReal) - (oldImag * oldImag)) + c_real
-                    newImag = (2 * oldReal * oldImag) + c_imag        
-            }
+    let dx = (a2 - a1) / 512;
+    let dy = (b2 - b1) / 512;
+    
+    let real = 0; let imag = 0;
 
-            oldReal = newReal
-            oldImag = newImag
+    let c_real = a1 + dx*x;
+    let c_imag = b1 + dy*y;
+    
+    let oldReal = real; let oldImag = imag;
+    let newReal = real; let newImag = imag;
+    
+    let diverged = false;
+
+    let maxMagnitude = 16;
+
+    for (let i = 0; i < t; i++) {
+        if (fakeMagnitude(oldReal, oldImag) > maxMagnitude) {
+            const colors = HSLtoRGB((180 + 180 * (i / 25)) % 360, 0.35, Math.min((i / 25), 0.75))
+            this.color(colors[0], colors[1], colors[2], 1);
+            diverged = true;
+            break;
+            // return [(180 + 180 * (i / 25)) % 360, 0.35, Math.min((i / 25), 0.75), 1];
+        } 
+        else {
+            newReal = ((oldReal * oldReal * oldReal) - (3 * oldReal * oldImag * oldImag)) + c_real
+            newImag = ((3 * oldReal * oldReal * oldImag) - (oldImag * oldImag * oldImag)) + c_imag
+            
+            oldReal = newReal; oldImag = newImag;
+        }
+    }
+
+    if (!diverged) { this.color(1, 1, 1, 1); }
+})
+.setGraphical(true)
+.setOutput([512, 512]);
+
+const tetrabrotSet = gpu.createKernel(function (a1, b1, a2, b2, t) {
+    let y = this.thread.y; let x = this.thread.x;
+
+    let dx = (a2 - a1) / 512;
+    let dy = (b2 - b1) / 512;
+    
+    let real = 0; let imag = 0;
+
+    let c_real = a1 + dx*x;
+    let c_imag = b1 + dy*y;
+    
+    let oldReal = real; let oldImag = imag;
+    let newReal = real; let newImag = imag;
+    
+    let diverged = false;
+
+    let maxMagnitude = 16;
+
+    for (let i = 0; i < t; i++) {
+        if (fakeMagnitude(oldReal, oldImag) > maxMagnitude) {
+            const colors = HSLtoRGB((180 + 180 * (i / 25)) % 360, 0.35, Math.min((i / 25), 0.75))
+            this.color(colors[0], colors[1], colors[2], 1);
+            diverged = true;
+            break;
+            // return [(180 + 180 * (i / 25)) % 360, 0.35, Math.min((i / 25), 0.75), 1];
+        } 
+        else {
+            newReal = ((oldReal * oldReal * oldReal * oldReal) - (6 * oldReal * oldReal * oldImag * oldImag) + (oldImag * oldImag * oldImag * oldImag)) + c_real
+            newImag = ((4 * oldReal * oldReal * oldReal * oldImag) - (4 * oldReal * oldImag * oldImag * oldImag)) + c_imag
+
+            oldReal = newReal; oldImag = newImag;
+        }
+    }
+
+    if (!diverged) { this.color(1, 1, 1, 1); }
+})
+.setGraphical(true)
+.setOutput([512, 512]);
+
+const burningShip = gpu.createKernel(function (a1, b1, a2, b2, t) {
+    let y = this.thread.y; let x = this.thread.x;
+
+    let dx = (a2 - a1) / 512;
+    let dy = (b2 - b1) / 512;
+    
+    let real = 0; let imag = 0;
+
+    let c_real = a1 + dx*x;
+    let c_imag = b1 + dy*y;
+    
+    let oldReal = real; let oldImag = imag;
+    let newReal = real; let newImag = imag;
+    
+    let diverged = false;
+
+    let maxMagnitude = 16;
+
+    for (let i = 0; i < t; i++) {
+        if (fakeMagnitude(oldReal, oldImag) > maxMagnitude) {
+            const colors = HSLtoRGB((180 + 180 * (i / 25)) % 360, 0.35, Math.min((i / 25), 0.75))
+            this.color(colors[0], colors[1], colors[2], 1);
+            diverged = true;
+            break;
+            // return [(180 + 180 * (i / 25)) % 360, 0.35, Math.min((i / 25), 0.75), 1];
+        } 
+        else {
+            newReal = Math.abs(oldReal); newImag = Math.abs(oldImag);
+            oldReal = newReal; oldImag = newImag;
+            
+            newReal = ((oldReal * oldReal) - (oldImag * oldImag)) + c_real
+            newImag = (2 * oldReal * oldImag) + c_imag    
+            
+            oldReal = newReal; oldImag = newImag;
+        }
+    }
+
+    if (!diverged) { this.color(1, 1, 1, 1); }
+})
+.setGraphical(true)
+.setOutput([512, 512]);
+
+const tricorn = gpu.createKernel(function (a1, b1, a2, b2, t) {
+    let y = this.thread.y; let x = this.thread.x;
+
+    let dx = (a2 - a1) / 512;
+    let dy = (b2 - b1) / 512;
+    
+    let real = 0; let imag = 0;
+
+    let c_real = a1 + dx*x;
+    let c_imag = b1 + dy*y;
+    
+    let oldReal = real; let oldImag = imag;
+    let newReal = real; let newImag = imag;
+    
+    let diverged = false;
+
+    let maxMagnitude = 16;
+
+    for (let i = 0; i < t; i++) {
+        if (fakeMagnitude(oldReal, oldImag) > maxMagnitude) {
+            const colors = HSLtoRGB((180 + 180 * (i / 25)) % 360, 0.35, Math.min((i / 25), 0.75))
+            this.color(colors[0], colors[1], colors[2], 1);
+            diverged = true;
+            break;
+            // return [(180 + 180 * (i / 25)) % 360, 0.35, Math.min((i / 25), 0.75), 1];
+        } 
+        else {
+            newImag = -oldImag; oldImag = newImag;
+
+            newReal = ((oldReal * oldReal) - (oldImag * oldImag)) + c_real
+            newImag = (2 * oldReal * oldImag) + c_imag    
+            
+            oldReal = newReal; oldImag = newImag;
+        }
+    }
+
+    if (!diverged) { this.color(1, 1, 1, 1); }
+})
+.setGraphical(true)
+.setOutput([512, 512]);
+
+const sawtooth = gpu.createKernel(function (a1, b1, a2, b2, t) {
+    let y = this.thread.y; let x = this.thread.x;
+
+    let dx = (a2 - a1) / 512;
+    let dy = (b2 - b1) / 512;
+    
+    let real = 0; let imag = 0;
+
+    let c_real = a1 + dx*x;
+    let c_imag = b1 + dy*y;
+    
+    let oldReal = real; let oldImag = imag;
+    let newReal = real; let newImag = imag;
+    
+    let diverged = false;
+
+    let maxMagnitude = 62500;
+
+    for (let i = 0; i < t; i++) {
+        if (fakeMagnitude(oldReal, oldImag) > maxMagnitude) {
+            const colors = HSLtoRGB((180 + 180 * (i / 25)) % 360, 0.35, Math.min((i / 25), 0.75))
+            this.color(colors[0], colors[1], colors[2], 1);
+            diverged = true;
+            break;
+            // return [(180 + 180 * (i / 25)) % 360, 0.35, Math.min((i / 25), 0.75), 1];
+        } 
+        else {
+            newReal = e_z_real(oldReal, oldImag) + c_real;
+            newImag = e_z_imag(oldReal, oldImag) + c_imag;
+
+            oldReal = newReal; oldImag = newImag;
+        }
+    }
+
+    if (!diverged) { this.color(1, 1, 1, 1); }
+})
+.setGraphical(true)
+.setOutput([512, 512]);
+
+const teardrop = gpu.createKernel(function (a1, b1, a2, b2, t) {
+    let y = this.thread.y; let x = this.thread.x;
+
+    let dx = (a2 - a1) / 512;
+    let dy = (b2 - b1) / 512;
+    
+    let real = 0; let imag = 0;
+
+    let c_real = a1 + dx*x;
+    let c_imag = b1 + dy*y;
+    
+    let oldReal = real; let oldImag = imag;
+    let newReal = real; let newImag = imag;
+    
+    let diverged = false;
+
+    let maxMagnitude = 62500;
+
+    for (let i = 0; i < t; i++) {
+        if (fakeMagnitude(oldReal, oldImag) > maxMagnitude) {
+            const colors = HSLtoRGB((180 + 180 * (i / 25)) % 360, 0.35, Math.min((i / 25), 0.75))
+            this.color(colors[0], colors[1], colors[2], 1);
+            diverged = true;
+            break;
+            // return [(180 + 180 * (i / 25)) % 360, 0.35, Math.min((i / 25), 0.75), 1];
+        } 
+        else {
+            newReal = ab_cd_real(oldReal, oldImag, magnitude(oldReal, oldImag), 0) + c_real;
+            newImag = ab_cd_imag(oldReal, oldImag, magnitude(oldReal, oldImag), 0) + c_imag;
+
+            oldReal = newReal; oldImag = newImag;
+        }
+    }
+
+    if (!diverged) { this.color(1, 1, 1, 1); }
+})
+.setGraphical(true)
+.setOutput([512, 512]);
+
+const screamingSoul = gpu.createKernel(function (a1, b1, a2, b2, t) {
+    let y = this.thread.y; let x = this.thread.x;
+
+    let dx = (a2 - a1) / 512;
+    let dy = (b2 - b1) / 512;
+    
+    let real = 0; let imag = 0;
+
+    let c_real = a1 + dx*x;
+    let c_imag = b1 + dy*y;
+    
+    let oldReal = real; let oldImag = imag;
+    let newReal = real; let newImag = imag;
+    
+    let diverged = false;
+
+    let maxMagnitude = 62500;
+
+    for (let i = 0; i < t; i++) {
+        if (fakeMagnitude(oldReal, oldImag) > maxMagnitude) {
+            const colors = HSLtoRGB((180 + 180 * (i / 25)) % 360, 0.35, Math.min((i / 25), 0.75))
+            this.color(colors[0], colors[1], colors[2], 1);
+            diverged = true;
+            break;
+            // return [(180 + 180 * (i / 25)) % 360, 0.35, Math.min((i / 25), 0.75), 1];
+        } 
+        else {
+            newReal = Math.abs(oldReal); newImag = Math.abs(oldImag);
+            oldReal = newReal; oldImag = newImag;
+
+            newReal = ab_cd_real(oldReal, oldImag, magnitude(oldReal, oldImag), 0) + c_real;
+            newImag = ab_cd_imag(oldReal, oldImag, magnitude(oldReal, oldImag), 0) + c_imag;
+
+            oldReal = newReal; oldImag = newImag;
         }
     }
 

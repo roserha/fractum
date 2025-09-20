@@ -1,0 +1,105 @@
+/* --- theme vars --- */
+:root {
+  --bg: radial-gradient(circle at top left, #0a0a0f, #1a1a1f, #000);
+  --text: #eee;
+  --muted: #bbb;
+  --highlight: rgb(68, 162, 255);
+  --panel-bg: rgba(255, 255, 255, 0.08);
+  --panel-blur: blur(10px);
+  --canvas-bg: #111;
+}
+
+/* --- base layout --- */
+
+body {
+  height:100%;
+  margin: 0;
+  font-family: "Inter", "Poppins", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 100vh;
+  padding: 2rem;
+  transition: background 0.6s ease, color 0.6s ease;
+  overflow: hidden;
+}
+
+div.wrap {height:100%; overflow:hidden;}
+
+h1 {
+  font-size: 2.2rem;
+  margin-bottom: 0.5rem;
+  background: linear-gradient(90deg, rgb(68, 162, 255), rgb(211, 52, 187));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-align: center;
+}
+
+p {
+  max-width: 600px;
+  text-align: center;
+  color: var(--muted);
+  margin-bottom: 1.5rem;
+}
+
+/* canvas wrapper */
+#drawbox {
+  width: 512px;
+  height: 512px;
+  background: var(--canvas-bg);
+  border-radius: 1rem;
+  box-shadow: 0 0 30px rgba(68, 162, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  overflow: hidden;
+  transition: background 0.6s ease;
+}
+
+#drawbox:hover {
+  transform: scale(1.02);
+  transition: transform 0.2s ease;
+}
+
+/* control panel */
+.controls {
+  backdrop-filter: var(--panel-blur);
+  background: var(--panel-bg);
+  border-radius: 1rem;
+  padding: 1rem 1.5rem;
+  margin-top: 1rem;
+  box-shadow: 0 0 15px rgba(0,0,0,0.4);
+  display: inline-block;
+  transition: background 0.6s ease;
+}
+
+/* dropdown */
+select {
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  border: none;
+  font-size: 1rem;
+  background: #222;
+  color: #eee;
+  outline: none;
+  margin-top: 0.5rem;
+  margin-bottom: 1rem;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+
+select:hover {
+  background: #333;
+  cursor: pointer;
+}
+
+/* highlighted numbers */
+#fromNum, #toNum, #iterNum, #scaleNum {
+  color: var(--highlight);
+  font-weight: bold;
+  transition: color 0.6s ease;
+}

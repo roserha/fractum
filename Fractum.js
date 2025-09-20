@@ -21,17 +21,57 @@ let rectangleSize = null;
 let drawboxCenterX = null;
 let drawboxCenterY = null;
 
+divergeFunction = mandelbrotSet;
+
 
 $(() => {
+    $('#toggleTheme').on('click', function () {
+        document.body.classList.toggle("light");
+    });
+
      $('#fractalType').on('change', function () {
         offsetX = - 0.5; offsetY = 0; scale = 100;
         fractType = $('#fractalType').val()
+
+        switch (fractType) {
+            case 'triplebrot':
+                divergeFunction = triplebrotSet;
+                break;
+
+            case 'tetrabrot':
+                divergeFunction = tetrabrotSet;
+                break;
+
+            case 'burnship':
+                divergeFunction = burningShip;
+                break;
+
+            case 'tricorn':
+                divergeFunction = tricorn;
+                break;
+
+            case 'rose1':
+                divergeFunction = sawtooth;
+                break;
+
+            case 'rose2':
+                divergeFunction = teardrop;
+                break;
+
+            case 'rose3':
+                divergeFunction = screamingSoul;
+                break;
+            
+            default:
+                divergeFunction = mandelbrotSet;
+                break;
+        }
      });
 
-     testDiverge(-200/scale+offsetX, 200/scale+offsetY, 
-        200/scale+offsetX, -200/scale+offsetY, threshold, fractType);
+     divergeFunction(-200/scale+offsetX, 200/scale+offsetY, 
+        200/scale+offsetX, -200/scale+offsetY, threshold);
 
-     drawbox = testDiverge.canvas;
+     drawbox = divergeFunction.canvas;
      
      console.log(drawbox);
      $('#drawbox').html(drawbox);
@@ -69,18 +109,21 @@ onwheel = (event) => {
 
     drawCells();
 }
+function updateData() {
+    $("#fromNum").text(`${(-200/scale+offsetX).toFixed(6)} + ${(-200/scale+offsetY).toFixed(6)} i`)
+    $("#toNum").text(`${(200/scale+offsetX).toFixed(6)} + ${(200/scale+offsetY).toFixed(6)} i`)
+    $("#iterNum").text(`${Math.floor(threshold).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`)
+    $("#scaleNum").text(`${(Math.round(scale)/100).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}`)
+}
+
+setInterval(updateData, 33);
 
 function drawCells() {
-    $("#fromNum").text(`${-200/scale+offsetX} + ${-200/scale+offsetY} i`)
-    $("#toNum").text(`${200/scale+offsetX} + ${200/scale+offsetY} i`)
-    $("#iterNum").text(`${Math.floor(threshold)}`)
-    $("#scaleNum").text(`${Math.round(scale)/100}`)
-
     threshold = Math.max(Math.pow(scale, 0.5) * 2.5, 25);
 
     if (offsetXOld != offsetX || offsetYOld != offsetY || scaleOld != scale || typeOld != fractType)
-        testDiverge(-200/scale+offsetX, 200/scale+offsetY, 
-            200/scale+offsetX, -200/scale+offsetY, threshold, fractType);
+        divergeFunction(-200/scale+offsetX, 200/scale+offsetY, 
+            200/scale+offsetX, -200/scale+offsetY, threshold);
 
 
     offsetXOld = offsetX; offsetYOld = offsetY; scaleOld = scale; typeOld = fractType;

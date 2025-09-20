@@ -1,5 +1,6 @@
 <html>
     <head>
+        <link rel="stylesheet" href="style.css">
         <title>Fractum</title>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
         <script src="https://unpkg.com/pts/dist/pts.js"></script>
@@ -7,20 +8,22 @@
         <script src="./FractMath.js" ></script>
         <script src="./Fractum.js" ></script>
     </head>
-    <body>
-        <h1>Fractum 0.2</h1>
+    <body><div class="wrapper">
+        <h1>Fractum v0.3</h1>
         <p>This is a very basic and silly online fractal renderer thingamabob. :)</p>
         <div id="drawbox"></div> <br>
+        <div class="controls">
         <select id="fractalType">
-            <option value=0>Mandelbrot Set</option>
-            <option value=3>"Triplebrot" Set</option>
-            <option value=4>"Tetrabrot" Set</option>
-            <option value=-1>Burning Ship*</option>
-            <option value=-3>Tricorn Fractal</option>
-            <option value=2501>Sawtooth Fractal (e^z+c)</option>
-            <option value=2502>Teardrop (z^|z|+c)</option>
-            <option value=2503>Screaming Soul Fractal (Burning-Ship-ped the Teardrop)</option>
+            <option value='mandel'>Mandelbrot Set</option>
+            <option value='triplebrot'>"Triplebrot" Set</option>
+            <option value='tetrabrot'>"Tetrabrot" Set</option>
+            <option value='burnship'>Burning Ship*</option>
+            <option value='tricorn'>Tricorn Fractal</option>
+            <option value='rose1'>Sawtooth Fractal (e^z+c)</option>
+            <option value='rose2'>Teardrop (z^|z|+c)</option>
+            <option value='rose3'>Screaming Soul Fractal (Burning-Ship-ped the Teardrop)</option>
         </select> <br>
-        <p>From <b id="fromNum">a+bi</b> to <b id="toNum">c+di</b>. (<b id="iterNum">x</b> iterations - <b id="scaleNum"></b>x magnification)</p>
-    </body>
+        <p>From <b id="fromNum">a+bi</b><br>To <b id="toNum">c+di</b><br>(<b id="iterNum">x</b> iterations - <b id="scaleNum"></b>x magnification)</p>
+        </div>
+    </div></body>
 </html>
