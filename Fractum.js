@@ -1,5 +1,3 @@
-Pts.namespace(window);
-
 drawbox = null
 form = null
 cells = null
