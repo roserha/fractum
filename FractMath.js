@@ -1,4 +1,4 @@
-Pts.namespace(window);
+// Pts.namespace(window);
 let threshold = 25
 const divergeDistance = 250
 
