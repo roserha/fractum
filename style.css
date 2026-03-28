@@ -45,6 +45,11 @@ p {
   margin-bottom: 1.5rem;
 }
 
+.whisper {
+  opacity: 0.5;
+  font-size: 0.75rem;
+}
+
 /* canvas wrapper */
 #drawbox {
   width: 512px;

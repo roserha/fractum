@@ -60,7 +60,7 @@ function HSLtoRGB(h,s,l) {
 }
 
 
-const gpu = new GPU.GPU();
+const gpu = new GPU();
 
 gpu
 .addFunction(magnitude)

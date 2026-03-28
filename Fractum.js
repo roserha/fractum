@@ -11,6 +11,8 @@ fractType = 0
 typeOld = fractType
 
 last_px = -1; last_py = -1;
+last_tx = -1; last_ty = -1; 
+initial_pinchdist = 0; initial_scale = 0;
 
 let mouseUp = true;
 let lastRefresh = 0;
@@ -94,6 +96,55 @@ $(() => {
             last_px = e.x; last_py = e.y;
         }
      }
+
+     handleTouchStart = (e) => {
+        let touches = e.touches;
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (touches.length == 1) {    
+            last_tx = e.touches[0].pageX; last_ty = e.touches[0].pageY;
+        } else if (touches.length == 2) {
+            tdx = e.touches[0].pageX - e.touches[1].pageX;
+            tdy = e.touches[0].pageY - e.touches[1].pageY;
+            
+            tdeltalen = Math.sqrt(tdx*tdx + tdy*tdy);
+            initial_pinchdist = tdeltalen;
+            initial_scale = scale;
+        }
+     }
+
+     handleTouchEvent = (e) => {
+        let touches = e.touches;
+        e.preventDefault();
+        e.stopPropagation();
+
+        if (touches.length == 1) {
+            if (last_tx > 0 && last_ty > 0) {
+                offsetX -= (e.touches[0].pageX - last_tx) / scale
+                offsetY -= (e.touches[0].pageY - last_ty) / scale
+            }
+    
+            last_tx = e.touches[0].pageX; last_ty = e.touches[0].pageY;
+        } else if (touches.length == 2) {
+            tdx = e.touches[0].pageX - e.touches[1].pageX;
+            tdy = e.touches[0].pageY - e.touches[1].pageY;
+            
+            tdeltalen = Math.sqrt(tdx*tdx + tdy*tdy);
+            pinchscale = tdeltalen / initial_pinchdist;
+            scale = pinchscale * initial_scale;
+        }
+     }
+
+     handleTouchEnd = (e) => { 
+        if (e.touches.length == 1) {
+            last_tx = e.touches[0].pageX; last_ty = e.touches[0].pageY;
+        }
+    }
+
+     drawbox.addEventListener('touchstart', handleTouchStart, true);
+     drawbox.addEventListener('touchmove', handleTouchEvent, true);
+     drawbox.addEventListener('touchend', handleTouchEnd, true);
 })
 
 addEventListener("wheel", (event) => { })
